@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.geek.edward.rfidcollector">
+    <!-- Permission for using NFC hardware -->
+    <uses-permission android:name="android.permission.NFC" />
+    <!-- Forcing device to have NFC hardware -->
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
+    <!-- Registering app for receiving NFC's TAG_DISCOVERED intent -->
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Scanning" />
+        <activity android:name=".Settings"></activity>
+    </application>
+
+</manifest>
