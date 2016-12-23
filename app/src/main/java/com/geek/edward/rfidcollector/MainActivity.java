@@ -159,81 +159,85 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor ename = spname.edit();
         SharedPreferences spcu = getSharedPreferences("current", MODE_PRIVATE);
         SharedPreferences.Editor ecu = spcu.edit();
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case 0:
-                //挂载system为rw
-                java.lang.Process p=null;
-                try {
-                    p=Runtime.getRuntime().exec(new String[]{"su","-c","mount -o rw,remount "+Environment.getRootDirectory().getPath()});
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    assert p != null;
-                    p.waitFor();
-                }catch (InterruptedException e) {
-                  e.printStackTrace();
-                }
-                boolean isexisted=new File(Environment.getRootDirectory().getPath()+"/etc/libnfc-nxp.conf.bak").exists();
-                if(!isexisted){
+                if(spcu.contains("current"))
+                    Toast.makeText(getApplicationContext(),"Restore to default first!", Toast.LENGTH_SHORT).show();
+                else{
+                    //挂载system为rw
+                    java.lang.Process p = null;
                     try {
-                        p=Runtime.getRuntime().exec(new String[]{"su","-c","cp "+Environment.getRootDirectory().getPath()+"/etc/libnfc-nxp.conf "+Environment.getRootDirectory().getPath()+"/etc/libnfc-nxp.conf.bak"});
+                        p = Runtime.getRuntime().exec(new String[]{"su", "-c", "mount -o rw,remount " + Environment.getRootDirectory().getPath()});
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    try {
+                        assert p != null;
+                        p.waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    boolean isexisted = new File(Environment.getRootDirectory().getPath() + "/etc/libnfc-nxp.conf.bak").exists();
+                    if (!isexisted) {
+                        try {
+                            p = Runtime.getRuntime().exec(new String[]{"su", "-c", "cp " + Environment.getRootDirectory().getPath() + "/etc/libnfc-nxp.conf " + Environment.getRootDirectory().getPath() + "/etc/libnfc-nxp.conf.bak"});
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        p.waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        p = Runtime.getRuntime().exec(new String[]{"su", "-c", "sed -i \"s/01, 02, 03, 04/" + card + "/g\" " + Environment.getRootDirectory().getPath() + "/etc/libnfc-nxp.conf"});
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        p.waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    //挂载system为ro
+                    try {
+                        p = Runtime.getRuntime().exec(new String[]{"su", "-c", "mount -o ro,remount " + Environment.getRootDirectory().getPath()});
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        p.waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    //重启NFC服务
+                    try {
+                        p = Runtime.getRuntime().exec(new String[]{"su", "-c", "svc nfc disable"});
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        p.waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        p = Runtime.getRuntime().exec(new String[]{"su", "-c", "svc nfc enable"});
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        p.waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Toast esuc = Toast.makeText(getApplicationContext(), card + "Emulated!", Toast.LENGTH_SHORT);
+                    esuc.show();
+                    ecu.putString("current", card);
+                    ecu.apply();
+                    showcurrent((TextView) findViewById(R.id.textView3), getSharedPreferences("current", MODE_PRIVATE));
                 }
-                try {
-                    p.waitFor();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    p=Runtime.getRuntime().exec(new String[]{"su","-c","sed -i \"s/01, 02, 03, 04/"+card+"/g\" "+Environment.getRootDirectory().getPath()+"/etc/libnfc-nxp.conf"});
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    p.waitFor();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                //挂载system为ro
-                try {
-                    p=Runtime.getRuntime().exec(new String[]{"su","-c","mount -o ro,remount "+Environment.getRootDirectory().getPath()});
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    p.waitFor();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                //重启NFC服务
-                try {
-                    p=Runtime.getRuntime().exec(new String[]{"su","-c","svc nfc disable"});
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    p.waitFor();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    p=Runtime.getRuntime().exec(new String[]{"su","-c","svc nfc enable"});
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    p.waitFor();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Toast esuc=Toast.makeText(getApplicationContext(), card+"Emulated!", Toast.LENGTH_SHORT);
-                esuc.show();
-                ecu.putString("current",card);
-                ecu.apply();
-                showcurrent((TextView) findViewById(R.id.textView3),getSharedPreferences("current",MODE_PRIVATE));
                 break;
             case 1: //修改卡片名
                 final EditText editText=new EditText(this);
