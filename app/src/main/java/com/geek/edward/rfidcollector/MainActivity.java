@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor ecu = spcu.edit();
         switch (item.getItemId()) {
             case 0:
-                if(spcu.contains("current"))
+                if(spcu.contains("current")&&!spcu.getString("current","").equals("N/A"))
                     Toast.makeText(getApplicationContext(),"Restore to default first!", Toast.LENGTH_SHORT).show();
                 else{
                     //挂载system为rw
